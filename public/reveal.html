@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>Your Secret Santa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+  <style>
+    :root { --green:#163f30; --green2:#1f5c45; --red:#c0392b; --gold:#e3b04b; --cream:#fbf6ec; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; overflow-x: hidden;
+      font-family: Inter, system-ui, sans-serif; color: var(--cream);
+      background: radial-gradient(ellipse at top, var(--green2), var(--green) 70%);
+      display: grid; place-items: center; padding: 24px;
+    }
+    h1, h2 { font-family: Fraunces, Georgia, serif; margin: 0; }
+    .snow { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+    .flake { position: absolute; top: -10px; color: #fff; opacity: .7; animation: fall linear infinite; }
+    @keyframes fall { to { transform: translateY(105vh) rotate(360deg); } }
+
+    .panel { position: relative; z-index: 1; width: 100%; max-width: 440px; text-align: center; }
+    .hello { font-size: 15px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+    .title { font-size: 34px; margin: 6px 0 28px; line-height: 1.15; }
+
+    .gift { width: 190px; height: 190px; margin: 0 auto; position: relative; cursor: pointer; border: 0; background: none; padding: 0; }
+    .gift:focus-visible { outline: 3px solid var(--gold); outline-offset: 8px; border-radius: 12px; }
+    .box { position: absolute; bottom: 0; left: 15px; width: 160px; height: 120px; background: var(--red); border-radius: 8px; box-shadow: inset 0 -12px 0 rgba(0,0,0,.12); }
+    .lid { position: absolute; top: 40px; left: 5px; width: 180px; height: 36px; background: #d24536; border-radius: 6px; transition: transform .6s cubic-bezier(.3,1.6,.5,1), opacity .5s .2s; }
+    .ribbon-v { position: absolute; left: 50%; transform: translateX(-50%); width: 26px; background: var(--gold); }
+    .box .ribbon-v { top: 0; bottom: 0; }
+    .lid .ribbon-v { top: 0; bottom: 0; }
+    .bow { position: absolute; top: -34px; left: 50%; transform: translateX(-50%); font-size: 44px; line-height: 1; }
+    .gift:not(.opened):hover .lid { transform: translateY(-6px) rotate(-3deg); }
+    .gift.wiggle { animation: wiggle 1.6s ease-in-out infinite; }
+    @keyframes wiggle { 0%,80%,100% { transform: rotate(0) } 85% { transform: rotate(-4deg) } 90% { transform: rotate(4deg) } 95% { transform: rotate(-2deg) } }
+    .gift.opened { animation: none; cursor: default; }
+    .gift.opened .lid { transform: translate(60px, -90px) rotate(35deg); opacity: 0; }
+    .tap { margin-top: 18px; opacity: .8; font-size: 14px; }
+
+    .result { display: none; }
+    .result.show { display: block; animation: pop .6s cubic-bezier(.3,1.5,.5,1) both; }
+    @keyframes pop { from { opacity: 0; transform: scale(.85) translateY(10px); } }
+    .card { background: var(--cream); color: #1f2a24; border-radius: 18px; padding: 28px 24px; box-shadow: 0 20px 50px rgba(0,0,0,.3); margin-top: -20px; position: relative; }
+    .card .label { font-size: 14px; color: #6b7570; }
+    .card .who { font-size: 40px; color: var(--red); margin: 6px 0 4px; word-break: break-word; }
+    .meta { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    .meta span { background: #efe7d6; border-radius: 999px; padding: 6px 12px; font-size: 13.5px; font-weight: 500; }
+    .note { margin-top: 18px; padding-top: 16px; border-top: 1px dashed #d9cfbb; font-size: 14.5px; line-height: 1.5; white-space: pre-wrap; color: #3d4741; }
+    .shh { margin-top: 18px; font-size: 13px; opacity: .8; }
+    .msg { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 16px; padding: 28px 22px; line-height: 1.5; }
+    .msg .emoji { font-size: 46px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="snow" id="snow" aria-hidden="true"></div>
+
+  <main class="panel" id="root">
+    <p style="opacity:.7">Loading…</p>
+  </main>
+
+  <template id="tplReveal">
+    <p class="hello">Hi <span data-name></span></p>
+    <h1 class="title" data-event></h1>
+    <div id="giftWrap">
+      <button class="gift wiggle" id="gift" aria-label="Open your gift to see who you're buying for">
+        <div class="box"><div class="ribbon-v"></div></div>
+        <div class="lid"><div class="ribbon-v"></div><div class="bow">🎀</div></div>
+      </button>
+      <p class="tap">Tap the present to see who you’re buying for</p>
+    </div>
+    <div class="result" id="result">
+      <div class="card">
+        <div class="label">You’re the Secret Santa for</div>
+        <h2 class="who" data-receiver></h2>
+        <div class="meta" data-meta></div>
+        <div class="note hidden" data-note></div>
+      </div>
+      <p class="shh">🤫 Keep it secret! You can come back to this link any time.</p>
+    </div>
+  </template>
+
+  <script src="/reveal.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Secret Santa · Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+</head>
+<body>
+
+  <!-- Login -->
+  <div id="login" class="login hidden">
+    <div class="card">
+      <div style="font-size:42px">🎅</div>
+      <h1>Secret Santa</h1>
+      <p class="sub">Organiser login</p>
+      <form id="loginForm">
+        <label for="pw">Password</label>
+        <input id="pw" type="password" autocomplete="current-password" required autofocus>
+        <button class="btn primary" type="submit">Log in</button>
+        <div class="err" id="loginErr"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="hidden">
+    <header class="topbar">
+      <h1>🎅 <span id="topTitle">Secret Santa</span></h1>
+      <button class="btn small" id="logoutBtn">Log out</button>
+    </header>
+
+    <main class="wrap">
+      <div class="grid">
+        <!-- People -->
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <h2>People</h2>
+              <p class="sub">Add everyone, set who they can't draw, then send each person their link.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <form class="add-row" id="addForm">
+              <input id="addName" type="text" placeholder="Name, e.g. Aunty Maria" maxlength="60" autocomplete="off">
+              <button class="btn primary" type="submit">Add</button>
+            </form>
+            <ul class="people" id="people"></ul>
+            <div class="empty hidden" id="empty">No one yet. Add the first person above.</div>
+          </div>
+        </section>
+
+        <!-- Sidebar -->
+        <aside class="stack">
+          <section class="card">
+            <div class="card-head"><h2>The draw</h2></div>
+            <div class="card-body stack">
+              <div class="draw-status"><span class="dot" id="drawDot"></span><span id="drawText">Not drawn yet</span></div>
+              <div id="viewedWrap" class="hidden">
+                <div class="sub" id="viewedText" style="margin-bottom:6px"></div>
+                <div class="progress"><div id="viewedBar" style="width:0"></div></div>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap">
+                <button class="btn primary" id="drawBtn">Draw names</button>
+                <button class="btn danger hidden" id="resetBtn">Reset</button>
+              </div>
+              <div id="pairsWrap" class="hidden">
+                <button class="btn small ghost" id="peekBtn">👀 Show who got who</button>
+                <ul class="pairs hidden" id="pairs"></ul>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head"><h2>Event details</h2></div>
+            <form class="card-body stack" id="eventForm">
+              <p class="sub" style="margin:0">Shown to everyone on their reveal page.</p>
+              <div><label for="evName">Event name</label><input id="evName" type="text" maxlength="80"></div>
+              <div><label for="evBudget">Budget</label><input id="evBudget" type="text" maxlength="40" placeholder="e.g. $50"></div>
+              <div><label for="evDate">Gift exchange date</label><input id="evDate" type="text" maxlength="40" placeholder="e.g. Christmas Eve, 24 Dec"></div>
+              <div><label for="evMsg">Note to everyone</label><textarea id="evMsg" rows="3" maxlength="1000" placeholder="e.g. Bring your gift wrapped to Nonna's!"></textarea></div>
+              <button class="btn primary" type="submit">Save details</button>
+            </form>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="/admin.js"></script>
+</body>
+</html>

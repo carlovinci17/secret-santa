@@ -1,0 +1,17 @@
+{
+  "name": "secret-santa",
+  "version": "1.0.0",
+  "description": "Self-hosted Secret Santa: admin panel, exclusions, and a private link per participant.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.41.1",
+    "express": "^4.21.2"
+  }
+}
