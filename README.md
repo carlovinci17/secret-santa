@@ -36,7 +36,9 @@ On Windows PowerShell: `$env:ADMIN_PASSWORD="your-password"; npm start`
 
 ## How it works
 
-- Data lives in one JSON file (`data/db.json`), written atomically. No database server needed.
+- **Storage:** locally, data lives in one JSON file (`data/db.json`, git-ignored), written atomically. When `KV_REST_API_URL` and `KV_REST_API_TOKEN` are set (as on Vercel), everything is stored as a single key, `secret-santa:db`, in Upstash Redis instead. Each API request loads the latest data and saves any changes before responding.
+- The local file and the Redis database are separate: data added on your machine does not appear on the deployed site, and vice versa.
+- Redeploying or pushing code never touches the stored data, so participants, links and draws survive deploys.
 - Links look like `https://your-site/s/<random-token>`. Tokens are 144-bit random, so they can't be guessed. The reveal API only ever returns the one name for that token.
 - Adding/removing people or changing exclusions cancels an existing draw (the admin panel warns you first). Renaming does not.
 - Links stay the same across redraws, so you only send them once.
@@ -45,10 +47,17 @@ On Windows PowerShell: `$env:ADMIN_PASSWORD="your-password"; npm start`
 
 Participants need to reach it over the internet, so host it somewhere public:
 
-**Vercel**
-1. Import the GitHub repo at vercel.com/new (no build settings needed).
+**Vercel** (this is how the live site runs)
+1. Import the GitHub repo at vercel.com/new. Vercel detects Express from `server.js`, so no build settings are needed. If the repo doesn't show up, give Vercel's GitHub app access to it at github.com/settings/installations.
 2. In the project's *Storage* tab, add **Upstash for Redis** from the Marketplace and connect it. This sets `KV_REST_API_URL` / `KV_REST_API_TOKEN`, which the app uses instead of `db.json` (Vercel's filesystem isn't persistent).
-3. Under *Settings → Environment Variables* add `ADMIN_PASSWORD` and `SESSION_SECRET` (required here, since each serverless instance would otherwise pick its own secret), then redeploy.
+3. Under *Settings → Environment Variables* add `ADMIN_PASSWORD` and `SESSION_SECRET` (required here, since each serverless instance would otherwise pick its own secret), then redeploy. Env var changes only apply to new deployments.
+4. Every push to `main` deploys to production automatically.
+
+Notes for Vercel:
+- Share the project's public production domain (`<project>.vercel.app`, under *Settings → Domains*). The other generated URLs are behind Vercel's deployment protection and ask visitors to log in to Vercel. Participant links use whatever address you opened the admin panel on, so open it via the public domain.
+- `vercel.json` serves `/admin` and `/s/<token>` as static pages and adds `noindex` / `no-referrer` headers to participant links.
+- The login lockout (5 wrong tries → 5 minutes) is tracked per server instance, so it's weaker on serverless. Use a long random `ADMIN_PASSWORD`.
+- To change the password, edit `ADMIN_PASSWORD` in the project settings and redeploy.
 
 **Azure App Service (Linux, Node 20)**
 1. Create the Web App, then under *Configuration* add `ADMIN_PASSWORD`, `SESSION_SECRET` and `DATA_DIR=/home/data` (`/home` persists across restarts and deploys).
